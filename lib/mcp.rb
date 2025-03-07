@@ -11,13 +11,6 @@ require_relative "mcp/delegator"
 require_relative "mcp/client"
 
 module MCP
-  class << self
-    attr_reader :server
-
-    def initialize_server(name:, **options)
-      @server ||= Server.new(name: name, **options)
-    end
-  end
 
   # require 'mcp' したファイルで最後に到達したら実行されるようにするため
   # https://docs.ruby-lang.org/ja/latest/method/Kernel/m/at_exit.html
