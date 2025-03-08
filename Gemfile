@@ -7,6 +7,9 @@ gem "json"
 group :development, :test do
   gem "minitest"
   gem "minitest-reporters"
+  gem "rbs-trace"
 end
 
-gem "standardrb", "~> 1.0", group: :development
+group :development do
+  gem "standardrb", "~> 1.0"
+end
