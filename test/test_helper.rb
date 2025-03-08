@@ -2,6 +2,7 @@
 
 require "minitest/autorun"
 require "minitest/reporters"
+require "rbs-trace"
 Minitest::Reporters.use! Minitest::Reporters::SpecReporter.new
 
 require_relative "../lib/mcp"
@@ -36,4 +37,12 @@ module MCPTest
       initialize_response
     end
   end
+end
+
+trace = RBS::Trace.new
+trace.enable
+
+Minitest.after_run do
+  trace.disable
+  trace.save_comments
 end
