@@ -11,10 +11,12 @@ module MCPTest
   class TestCase < Minitest::Test
     protected
 
+    # @rbs () -> MCP::Server
     def build_test_server
       MCP::Server.new(name: "test_server")
     end
 
+    # @rbs (MCP::Server) -> Hash[untyped, untyped]
     def initialize_server(server)
       init_request = {
         jsonrpc: MCP::Constants::JSON_RPC_VERSION,

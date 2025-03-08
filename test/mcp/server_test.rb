@@ -4,6 +4,7 @@ require_relative "../test_helper"
 
 module MCP
   class ServerTest < MCPTest::TestCase
+    # @rbs () -> bool
     def test_server_initialization
       server = Server.new(name: "test_server")
       assert_equal "test_server", server.name
@@ -11,6 +12,7 @@ module MCP
       refute server.initialized
     end
 
+    # @rbs () -> bool
     def test_initialize_request
       server = Server.new(name: "test_server")
       request = {
@@ -34,6 +36,7 @@ module MCP
       assert_equal false, response[:result][:capabilities][:tools][:listChanged]
     end
 
+    # @rbs () -> bool
     def test_initialize_with_unsupported_version
       server = Server.new(name: "test_server")
       request = {
@@ -53,6 +56,7 @@ module MCP
       assert_equal "Unsupported protocol version", response[:error][:message]
     end
 
+    # @rbs () -> bool
     def test_initialized_notification
       server = Server.new(name: "test_server")
 
@@ -79,6 +83,7 @@ module MCP
       assert_nil response
     end
 
+    # @rbs () -> bool
     def test_request_before_initialization
       server = Server.new(name: "test_server")
       request = {
@@ -92,6 +97,7 @@ module MCP
       assert_equal "Server not initialized", response[:error][:message]
     end
 
+    # @rbs () -> MatchData
     def test_handle_call_tool
       server = Server.new(name: "test_server")
       initialize_server(server)
@@ -138,6 +144,7 @@ module MCP
       assert_match(/Tool not found/, response[:result][:content].first[:text])
     end
 
+    # @rbs () -> bool
     def test_handle_ping
       server = Server.new(name: "test_server")
 

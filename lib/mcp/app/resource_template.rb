@@ -5,6 +5,7 @@ require_relative "resource"
 module MCP
   class App
     module ResourceTemplate
+      # @rbs () -> Hash[untyped, untyped]
       def resource_templates
         @resource_templates ||= {}
       end
@@ -12,6 +13,7 @@ module MCP
       class ResourceTemplateBuilder
         attr_reader :uri_template, :name, :description, :mime_type, :handler
 
+        # @rbs (String?) -> void
         def initialize(uri_template)
           raise ArgumentError, "Resource URI template cannot be nil or empty" if uri_template.nil? || uri_template.empty?
           @uri_template = uri_template
@@ -23,12 +25,14 @@ module MCP
         end
 
         # standard:disable Lint/DuplicateMethods,Style/TrivialAccessors
+        # @rbs (String) -> void
         def name(value)
           @name = value
         end
         # standard:enable Lint/DuplicateMethods,Style/TrivialAccessors
 
         # standard:disable Lint/DuplicateMethods,Style/TrivialAccessors
+        # @rbs (String) -> void
         def description(text)
           @description = text
         end
@@ -40,10 +44,12 @@ module MCP
         end
         # standard:enable Lint/DuplicateMethods,Style/TrivialAccessors
 
+        # @rbs () -> Proc
         def call(&block)
           @handler = block
         end
 
+        # @rbs () -> Hash[untyped, untyped]
         def to_resource_template_hash
           raise ArgumentError, "Name must be provided" if @name.empty?
 
@@ -59,6 +65,7 @@ module MCP
 
         # Extract variables from a URI template
         # e.g., "channels://{channel_id}" => ["channel_id"]
+        # @rbs (String) -> Array[untyped]
         def extract_variables(uri_template)
           variables = []
           uri_template.scan(/\{([^}]+)\}/) do |match|
@@ -68,6 +75,7 @@ module MCP
         end
 
         # Creates a pattern for matching URIs against this template
+        # @rbs () -> Regexp
         def to_pattern
           pattern_string = Regexp.escape(@uri_template).gsub(/\\\{[^}]+\\\}/) do |match|
             "([^/]+)"
@@ -77,6 +85,7 @@ module MCP
 
         # Extract variable values from a concrete URI based on the template
         # e.g., template: "channels://{channel_id}", uri: "channels://123" => {"channel_id" => "123"}
+        # @rbs (String) -> Hash[untyped, untyped]
         def extract_variable_values(uri)
           pattern = to_pattern
           match = pattern.match(uri)
@@ -90,6 +99,7 @@ module MCP
         end
       end
 
+      # @rbs (String?) -> Hash[untyped, untyped]?
       def register_resource_template(uri_template, &block)
         builder = ResourceTemplateBuilder.new(uri_template)
         builder.instance_eval(&block)
@@ -99,6 +109,7 @@ module MCP
       end
 
       # Find a template that matches the given URI and extract variable values
+      # @rbs (String) -> Array[untyped]
       def find_matching_template(uri)
         resource_templates.each do |template_uri, template|
           builder = ResourceTemplateBuilder.new(template_uri)
@@ -108,6 +119,7 @@ module MCP
         [nil, {}]
       end
 
+      # @rbs (?cursor: nil | String, ?page_size: nil | Integer) -> Hash[untyped, untyped]
       def list_resource_templates(cursor: nil, page_size: nil)
         start_index = cursor&.to_i || 0
         values = resource_templates.values
@@ -129,6 +141,7 @@ module MCP
 
       private
 
+      # @rbs (Hash[untyped, untyped]) -> Hash[untyped, untyped]
       def format_resource_template(template)
         {
           uriTemplate: template[:uri_template],

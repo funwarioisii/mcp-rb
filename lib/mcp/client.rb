@@ -9,6 +9,7 @@ module MCP
   class Client
     attr_reader :command, :args, :process, :stdin, :stdout, :stderr, :wait_thread
 
+    # @rbs (command: String, ?args: Array[untyped], ?name: String, ?version: String) -> void
     def initialize(command:, args: [], name: "mcp-client", version: VERSION)
       @command = command
       @args = args
@@ -17,6 +18,7 @@ module MCP
       @version = version
     end
 
+    # @rbs () -> MCP::Client
     def connect
       return if @process
 
@@ -25,8 +27,10 @@ module MCP
       self
     end
 
+    # @rbs () -> bool
     def running? = !@process.nil?
 
+    # @rbs () -> Array[untyped]?
     def list_tools
       ensure_running
       send_request({
@@ -37,6 +41,7 @@ module MCP
       })
     end
 
+    # @rbs (name: String, ?args: Hash[untyped, untyped]) -> Hash[untyped, untyped]?
     def call_tool(name:, args: {})
       ensure_running
       send_request({
@@ -50,6 +55,7 @@ module MCP
       })
     end
 
+    # @rbs () -> nil
     def close
       return unless @process
 
@@ -66,10 +72,12 @@ module MCP
 
     private
 
+    # @rbs () -> void
     def ensure_running
       raise "Server process not running. Call #start first." unless running?
     end
 
+    # @rbs () -> void
     def initialize_connection
       response = send_request({
         jsonrpc: Constants::JSON_RPC_VERSION,
@@ -92,6 +100,7 @@ module MCP
       response
     end
 
+    # @rbs () -> void
     def start_server
       @stdin, @stdout, @stderr, @wait_thread = Open3.popen3(@command, *@args)
       @process = @wait_thread.pid
@@ -105,6 +114,7 @@ module MCP
       end
     end
 
+    # @rbs (Hash[untyped, untyped]) -> (Hash[untyped, untyped] | Array[untyped])
     def send_request(request)
       @stdin.puts(JSON.generate(request))
       response = @stdout.gets

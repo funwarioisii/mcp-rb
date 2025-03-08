@@ -8,10 +8,12 @@ module MCP
     class MockServer
       attr_reader :input, :output, :error
 
+      # @rbs () -> void
       def initialize
         reset_streams
       end
 
+      # @rbs () -> bool
       def reset_streams
         @input = StringIO.new
         @output = StringIO.new
@@ -20,6 +22,7 @@ module MCP
         @initialized = false
       end
 
+      # @rbs (*String) -> Array[untyped]
       def start(*_args)
         reset_streams
         setup_init_response
@@ -28,12 +31,14 @@ module MCP
         [InputWrapper.new(@input, self), OutputWrapper.new(@output), @error, wait_thread]
       end
 
+      # @rbs (Hash[untyped, untyped]) -> void
       def add_response(response)
         @responses << response
       end
 
       private
 
+      # @rbs () -> void
       def setup_init_response
         @init_response = {
           jsonrpc: Constants::JSON_RPC_VERSION,
@@ -42,6 +47,7 @@ module MCP
         }
       end
 
+      # @rbs () -> Thread
       def create_mock_thread
         thread = Thread.new {}
         def thread.pid
@@ -50,6 +56,7 @@ module MCP
         thread
       end
 
+      # @rbs (String) -> Hash[untyped, untyped]?
       def handle_request(request)
         request_data = JSON.parse(request, symbolize_names: true)
         case request_data[:method]
@@ -66,11 +73,13 @@ module MCP
       end
 
       class InputWrapper < StringIO
+        # @rbs (StringIO, MCP::ClientTest::MockServer) -> void
         def initialize(stringio, server)
           @stringio = stringio
           @server = server
         end
 
+        # @rbs (String) -> void
         def puts(str)
           @stringio.puts(str)
           if (response = @server.send(:handle_request, str))
@@ -89,10 +98,12 @@ module MCP
       end
 
       class OutputWrapper < StringIO
+        # @rbs (StringIO) -> void
         def initialize(stringio)
           @stringio = stringio
         end
 
+        # @rbs () -> String
         def gets
           result = @stringio.gets
           @stringio.rewind
@@ -109,6 +120,7 @@ module MCP
       end
     end
 
+    # @rbs () -> MCP::Client
     def setup
       @mock_server = MockServer.new
       @client = Client.new(command: "mock")
@@ -117,16 +129,19 @@ module MCP
       end
     end
 
+    # @rbs () -> nil
     def teardown
       @client.close if @client&.running?
     end
 
+    # @rbs (MCP::ClientTest::MockServer) -> (MCP::Client | bool)
     def with_mock_server(mock_server)
       Open3.stub :popen3, mock_server.method(:start) do
         yield
       end
     end
 
+    # @rbs () -> bool
     def test_initialize
       client = Client.new(command: "mock")
       assert_equal "mock", client.command
@@ -134,6 +149,7 @@ module MCP
       refute client.running?
     end
 
+    # @rbs () -> bool
     def test_initialize_with_args
       client = Client.new(command: "mock", args: ["--version"], name: "test-client", version: "1.0.0")
       assert_equal "mock", client.command
@@ -141,6 +157,7 @@ module MCP
       refute client.running?
     end
 
+    # @rbs () -> bool
     def test_connect
       assert @client.running?
       assert_equal 12345, @client.process
@@ -150,24 +167,28 @@ module MCP
       assert @client.wait_thread
     end
 
+    # @rbs () -> MatchData
     def test_list_tools_without_connection
       client = Client.new(command: "mock")
       error = assert_raises(RuntimeError) { client.list_tools }
       assert_match(/Server process not running/, error.message)
     end
 
+    # @rbs () -> MatchData
     def test_call_tool_without_connection
       client = Client.new(command: "mock")
       error = assert_raises(RuntimeError) { client.call_tool(name: "test") }
       assert_match(/Server process not running/, error.message)
     end
 
+    # @rbs () -> bool
     def test_close_without_connection
       client = Client.new(command: "mock")
       client.close
       refute client.running?
     end
 
+    # @rbs () -> bool
     def test_list_tools
       mock_server = MockServer.new
       client = Client.new(command: "mock")
@@ -185,6 +206,7 @@ module MCP
       end
     end
 
+    # @rbs () -> bool
     def test_call_tool
       mock_server = MockServer.new
       client = Client.new(command: "mock")

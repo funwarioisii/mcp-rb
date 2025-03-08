@@ -4,6 +4,7 @@ require_relative "../test_helper"
 
 module MCP
   class DelegatorTest < MCPTest::TestCase
+    # @rbs () -> bool
     def test_server_version
       server = build_test_server
       server.version "1.2.3"
@@ -14,6 +15,7 @@ module MCP
       assert_equal "1.2.3", initialize_response[:result][:serverInfo][:version]
     end
 
+    # @rbs () -> bool
     def test_tool_registration
       server = Server.new(name: "test_server")
       initialize_server(server)
@@ -31,6 +33,7 @@ module MCP
       assert_equal "A test tool", tools.first[:description]
     end
 
+    # @rbs () -> bool
     def test_resource_registration
       server = Server.new(name: "test_server")
       initialize_server(server)
@@ -48,6 +51,7 @@ module MCP
       assert_equal "A test resource", resources.first[:description]
     end
 
+    # @rbs () -> bool
     def test_resource_template_registration
       server = Server.new(name: "test_server")
       initialize_server(server)
@@ -65,6 +69,7 @@ module MCP
       assert_equal "A test resource", templates.first[:description]
     end
 
+    # @rbs () -> bool
     def test_tool_block_execution
       server = Server.new(name: "test_server")
       initialize_server(server)
@@ -80,6 +85,7 @@ module MCP
       assert_equal "hello", result
     end
 
+    # @rbs () -> bool
     def test_resource_block_execution
       server = Server.new(name: "test_server")
       initialize_server(server)
@@ -94,6 +100,7 @@ module MCP
       assert_equal "test content", result
     end
 
+    # @rbs () -> bool
     def test_resource_template_block_execution
       server = Server.new(name: "test_server")
       initialize_server(server)
@@ -108,6 +115,7 @@ module MCP
       assert_equal "test content test", result
     end
 
+    # @rbs () -> ArgumentError
     def test_tool_registration_with_invalid_name
       server = Server.new(name: "test_server")
       initialize_server(server)
@@ -116,6 +124,7 @@ module MCP
       assert_raises(ArgumentError) { server.tool("") { "test" } }
     end
 
+    # @rbs () -> ArgumentError
     def test_resource_registration_with_invalid_name
       server = Server.new(name: "test_server")
       initialize_server(server)
@@ -123,6 +132,7 @@ module MCP
       assert_raises(ArgumentError) { server.resource(nil) { "test" } }
     end
 
+    # @rbs () -> ArgumentError
     def test_resource_template_registration_with_invalid_name
       server = Server.new(name: "test_server")
       initialize_server(server)

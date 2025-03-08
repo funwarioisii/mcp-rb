@@ -3,6 +3,7 @@
 module MCP
   class App
     module Resource
+      # @rbs () -> Hash[untyped, untyped]
       def resources
         @resources ||= {}
       end
@@ -10,6 +11,7 @@ module MCP
       class ResourceBuilder
         attr_reader :uri, :name, :description, :mime_type, :handler
 
+        # @rbs (String?) -> void
         def initialize(uri)
           raise ArgumentError, "Resource URI cannot be nil or empty" if uri.nil? || uri.empty?
           @uri = uri
@@ -20,12 +22,14 @@ module MCP
         end
 
         # standard:disable Lint/DuplicateMethods,Style/TrivialAccessors
+        # @rbs (String) -> void
         def name(value)
           @name = value
         end
         # standard:enable Lint/DuplicateMethods,Style/TrivialAccessors
 
         # standard:disable Lint/DuplicateMethods,Style/TrivialAccessors
+        # @rbs (String) -> void
         def description(text)
           @description = text
         end
@@ -37,10 +41,12 @@ module MCP
         end
         # standard:enable Lint/DuplicateMethods,Style/TrivialAccessors
 
+        # @rbs () -> Proc
         def call(&block)
           @handler = block
         end
 
+        # @rbs () -> Hash[untyped, untyped]?
         def to_resource_hash
           raise ArgumentError, "Handler must be provided" unless @handler
           raise ArgumentError, "Name must be provided" if @name.empty?
@@ -55,6 +61,7 @@ module MCP
         end
       end
 
+      # @rbs (String?) -> Hash[untyped, untyped]?
       def register_resource(uri, &block)
         builder = ResourceBuilder.new(uri)
         builder.instance_eval(&block)
@@ -63,6 +70,7 @@ module MCP
         resource_hash
       end
 
+      # @rbs (?cursor: nil | String, ?page_size: nil | Integer) -> Hash[untyped, untyped]
       def list_resources(cursor: nil, page_size: nil)
         start_index = cursor&.to_i || 0
         values = resources.values
@@ -82,6 +90,7 @@ module MCP
         }
       end
 
+      # @rbs (String) -> Hash[untyped, untyped]?
       def read_resource(uri)
         resource = resources[uri]
 
@@ -125,6 +134,7 @@ module MCP
 
       private
 
+      # @rbs (Hash[untyped, untyped]) -> Hash[untyped, untyped]
       def format_resource(resource)
         {
           uri: resource[:uri],

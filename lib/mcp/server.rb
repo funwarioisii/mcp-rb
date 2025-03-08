@@ -10,6 +10,7 @@ module MCP
     attr_writer :name, :version
     attr_reader :initialized
 
+    # @rbs (name: String, ?version: String) -> void
     def initialize(name:, version: "0.1.0")
       @name = name
       @version = version
@@ -18,12 +19,14 @@ module MCP
       @supported_protocol_versions = [Constants::PROTOCOL_VERSION]
     end
 
+    # @rbs (?nil) -> String
     def name(value = nil)
       return @name if value.nil?
 
       @name = value
     end
 
+    # @rbs (?String?) -> String
     def version(value = nil)
       return @version if value.nil?
 
@@ -31,14 +34,17 @@ module MCP
       @supported_protocol_versions << value
     end
 
+    # @rbs (String?) -> Hash[untyped, untyped]?
     def tool(name, &block)
       @app.register_tool(name, &block)
     end
 
+    # @rbs (String?) -> Hash[untyped, untyped]?
     def resource(uri, &block)
       @app.register_resource(uri, &block)
     end
 
+    # @rbs (String?) -> Hash[untyped, untyped]?
     def resource_template(uri_template, &block)
       @app.register_resource_template(uri_template, &block)
     end
@@ -85,6 +91,7 @@ module MCP
       error_response(nil, Constants::ErrorCodes::INTERNAL_ERROR, e.message)
     end
 
+    # @rbs (Hash[untyped, untyped]) -> Hash[untyped, untyped]?
     def handle_request(request)
       allowed_methods = [
         Constants::RequestMethods::INITIALIZE,
@@ -109,6 +116,7 @@ module MCP
       end
     end
 
+    # @rbs (Hash[untyped, untyped]) -> Hash[untyped, untyped]
     def handle_initialize(request)
       return error_response(request[:id], Constants::ErrorCodes::ALREADY_INITIALIZED, "Server already initialized") if @initialized
 
@@ -151,6 +159,7 @@ module MCP
       }
     end
 
+    # @rbs (Hash[untyped, untyped]) -> nil
     def handle_initialized(request)
       return error_response(request[:id], Constants::ErrorCodes::ALREADY_INITIALIZED, "Server already initialized") if @initialized
 
@@ -164,6 +173,7 @@ module MCP
       success_response(request[:id], result)
     end
 
+    # @rbs (Hash[untyped, untyped]) -> Hash[untyped, untyped]
     def handle_call_tool(request)
       name = request.dig(:params, :name)
       arguments = request.dig(:params, :arguments)
@@ -198,10 +208,12 @@ module MCP
       end
     end
 
+    # @rbs (Hash[untyped, untyped]) -> Hash[untyped, untyped]
     def handle_ping(request)
       success_response(request[:id], {})
     end
 
+    # @rbs (Integer, Hash[untyped, untyped]) -> Hash[untyped, untyped]
     def success_response(id, result)
       {
         jsonrpc: MCP::Constants::JSON_RPC_VERSION,
@@ -210,6 +222,7 @@ module MCP
       }
     end
 
+    # @rbs (Integer, Integer, String, ?Hash[untyped, untyped]?) -> Hash[untyped, untyped]
     def error_response(id, code, message, data = nil)
       response = {
         jsonrpc: MCP::Constants::JSON_RPC_VERSION,

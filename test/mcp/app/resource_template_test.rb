@@ -5,10 +5,12 @@ require_relative "../../test_helper"
 module MCP
   class App
     class ResourceTemplateTest < MCPTest::TestCase
+      # @rbs () -> MCP::App
       def setup
         @app = App.new
       end
 
+      # @rbs () -> bool
       def test_extract_variables
         @app.register_resource_template("/test/{param1}/{param2}") do
           name "test_template"
@@ -20,6 +22,7 @@ module MCP
         assert_equal({param1: "value1", param2: "value2"}, values)
       end
 
+      # @rbs () -> bool
       def test_register_and_list_resource_templates
         @app.register_resource_template("/test/{param_1}") do
           name "test_resource template"
@@ -37,6 +40,7 @@ module MCP
         assert_nil result[:nextCursor]
       end
 
+      # @rbs () -> bool
       def test_resource_templates_pagination
         10.times do |i|
           @app.register_resource_template("/test#{i}/{param_1}") do
@@ -69,6 +73,7 @@ module MCP
         assert_nil result[:nextCursor]
       end
 
+      # @rbs () -> MatchData
       def test_read_resource_template
         @app.register_resource_template("/test/{param_1}") do
           name "test_resource"
@@ -84,6 +89,7 @@ module MCP
         assert_match(/Resource not found/, error.message)
       end
 
+      # @rbs () -> MatchData
       def test_invalid_resource_registration
         error = assert_raises(ArgumentError) { @app.register_resource(nil) }
         assert_match(/Resource URI cannot be nil or empty/, error.message)

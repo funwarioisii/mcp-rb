@@ -5,10 +5,12 @@ require_relative "../../test_helper"
 module MCP
   class App
     class ToolTest < MCPTest::TestCase
+      # @rbs () -> MCP::App
       def setup
         @app = App.new
       end
 
+      # @rbs () -> bool
       def test_tools_pagination
         10.times do |i|
           @app.register_tool("tool#{i}") do
@@ -34,6 +36,7 @@ module MCP
         assert_equal "tool9", result[:tools].last[:name]
       end
 
+      # @rbs () -> bool
       def test_register_tool
         tool = @app.register_tool("greet") do
           description "Greet someone by name"
@@ -67,6 +70,7 @@ module MCP
         }, result)
       end
 
+      # @rbs () -> bool
       def test_register_tool_with_multiple_arguments
         tool = @app.register_tool("format_greeting") do
           description "Format a greeting with title and name"
@@ -140,6 +144,7 @@ module MCP
         assert_equal "Error: Missing required param :title", result.dig(:content, 0, :text)
       end
 
+      # @rbs () -> MatchData
       def test_tool_without_handler
         error = assert_raises(ArgumentError) do
           @app.register_tool("invalid") do
@@ -149,6 +154,7 @@ module MCP
         assert_match(/Handler must be provided/, error.message)
       end
 
+      # @rbs () -> MatchData
       def test_tool_with_invalid_name
         error = assert_raises(ArgumentError) do
           @app.register_tool(nil) do
@@ -161,6 +167,7 @@ module MCP
         assert_match(/Tool name cannot be nil or empty/, error.message)
       end
 
+      # @rbs () -> bool
       def test_tool_with_nested_object
         tool = @app.register_tool("create_user") do
           description "Create a user with details"
@@ -226,6 +233,7 @@ module MCP
       end
 
       # Test for a tool with an array of simple types
+      # @rbs () -> bool
       def test_tool_with_array_argument
         @app.register_tool("sum_numbers") do
           description "Sum an array of numbers"
@@ -276,6 +284,7 @@ module MCP
       end
 
       # Test for a tool with an array of objects
+      # @rbs () -> bool
       def test_tool_with_array_of_objects
         @app.register_tool("list_users") do
           description "List users with their details"

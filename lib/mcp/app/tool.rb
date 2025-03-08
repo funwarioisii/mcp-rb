@@ -3,18 +3,21 @@
 module MCP
   class App
     module Tool
+      # @rbs () -> Hash[untyped, untyped]
       def tools
         @tools ||= {}
       end
 
       # Builds schemas for arguments, supporting simple types, nested objects, and arrays
       class SchemaBuilder
+        # @rbs () -> void
         def initialize
           @schema = nil
           @properties = {}
           @required = []
         end
 
+        # @rbs (Symbol, ?Class?, ?required: bool, ?description: String, ?items: nil | Class) -> Array[untyped]?
         def argument(name, type = nil, required: false, description: "", items: nil, &block)
           if type == Array
             if block_given?
@@ -43,12 +46,14 @@ module MCP
           @schema = {type: ruby_type_to_schema_type(t)}
         end
 
+        # @rbs () -> Hash[untyped, untyped]
         def to_schema
           @schema || {type: :object, properties: @properties, required: @required}
         end
 
         private
 
+        # @rbs (Class) -> Symbol
         def ruby_type_to_schema_type(type)
           if type == String
             :string
@@ -70,6 +75,7 @@ module MCP
       class ToolBuilder
         attr_reader :name, :arguments, :handler
 
+        # @rbs (String?) -> void
         def initialize(name)
           raise ArgumentError, "Tool name cannot be nil or empty" if name.nil? || name.empty?
           @name = name
@@ -78,18 +84,22 @@ module MCP
           @handler = nil
         end
 
+        # @rbs (?String) -> String
         def description(text = nil)
           text ? @description = text : @description
         end
 
+        # @rbs (*Symbol | Class | Symbol, **bool | String | bool | nil | Class | String) -> void
         def argument(*args, **kwargs, &block)
           @schema_builder.argument(*args, **kwargs, &block)
         end
 
+        # @rbs () -> Proc
         def call(&block)
           @handler = block if block_given?
         end
 
+        # @rbs () -> Hash[untyped, untyped]?
         def to_tool_hash
           raise ArgumentError, "Handler must be provided" unless @handler
           {
@@ -102,6 +112,7 @@ module MCP
       end
 
       # Registers a tool with the given name and block
+      # @rbs (String?) -> Hash[untyped, untyped]?
       def register_tool(name, &block)
         builder = ToolBuilder.new(name)
         builder.instance_eval(&block)
@@ -109,6 +120,7 @@ module MCP
       end
 
       # Lists tools with pagination
+      # @rbs (?cursor: nil | String, ?page_size: Integer) -> Hash[untyped, untyped]
       def list_tools(cursor: nil, page_size: 10)
         start = cursor ? cursor.to_i : 0
         paginated = tools.values[start, page_size]
@@ -117,6 +129,7 @@ module MCP
       end
 
       # Calls a tool with the provided arguments
+      # @rbs (String, **String | nil | Hash[untyped, untyped] | Array[untyped]) -> Hash[untyped, untyped]
       def call_tool(name, **args)
         tool = tools[name]
         raise ArgumentError, "Tool not found: #{name}" unless tool
@@ -129,6 +142,7 @@ module MCP
 
       private
 
+      # @rbs (Hash[untyped, untyped], String | Hash[untyped, untyped] | Integer | Array[untyped], ?Symbol | String) -> Array[untyped]
       def validate(schema, arg, path = "")
         errors = []
         type = schema[:type]
@@ -175,6 +189,7 @@ module MCP
         errors
       end
 
+      # @rbs (Hash[untyped, untyped], Hash[untyped, untyped]) -> void
       def validate_arguments(schema, args)
         errors = validate(schema, args, "")
         unless errors.empty?
