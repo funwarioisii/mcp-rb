@@ -1,0 +1,18 @@
+--- |
+  Client: {"jsonrpc": "2.0", "method": "initialize", "params": {"protocolVersion": "2024-11-05"}, "id": 1}
+  Server: {"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2024-11-05","capabilities":{"resources":{"subscribe":false,"listChanged":false},"tools":{"listChanged":false}},"serverInfo":{"name":"hello-world","version":"1.0.0"}}}
+  Client: {"jsonrpc": "2.0", "method": "notifications/initialized"}
+  Client: {"jsonrpc": "2.0", "method": "tools/list", "id": 2}
+  Server: {"jsonrpc":"2.0","id":2,"result":{"tools":[{"name":"greet","description":"Greet someone by name","inputSchema":{"type":"object","properties":{"name":{"type":"string","description":"Name to greet"}},"required":["name"]}},{"name":"nested_greet","description":"Greet someone by First and Last Name","inputSchema":{"type":"object","properties":{"person":{"type":"object","properties":{"first_name":{"type":"string","description":"First name"},"last_name":{"type":"string","description":"Last name"}},"required":[],"description":"Person to greet"}},"required":["person"]}},{"name":"group_greeting","description":"Greet multiple people","inputSchema":{"type":"object","properties":{"people":{"type":"array","description":"People to greet","items":{"type":"string"}}},"required":["people"]}}]}}
+  Client: {"jsonrpc": "2.0", "method": "tools/call", "params": {"name": "greet", "arguments": {"name": "World"}}, "id": 3}
+  Server: {"jsonrpc":"2.0","id":3,"result":{"content":[{"type":"text","text":"Hello, World!"}],"isError":false}}
+  Client: {"jsonrpc": "2.0", "method": "resources/list", "id": 4}
+  Server: {"jsonrpc":"2.0","id":4,"result":{"resources":[{"uri":"hello://world","name":"Hello World","description":"A simple hello world message","mimeType":"text/plain"}]}}
+  Client: {"jsonrpc": "2.0", "method": "resources/read", "params": {"uri": "hello://world"}, "id": 5}
+  Server: {"jsonrpc":"2.0","id":5,"result":{"contents":[{"uri":"hello://world","mimeType":"text/plain","text":"Hello, World!"}]}}
+  Client: {"jsonrpc": "2.0", "method": "resources/templates/list", "id": 6}
+  Server: {"jsonrpc":"2.0","id":6,"result":{"resourceTemplates":[{"uriTemplate":"users://{user_name}","name":"Hello User","description":"Template for accessing user resources by name","mimeType":"application/json"},{"uriTemplate":"users://{user_name}/posts/{post_id}","name":"User Post","description":"Template for accessing user posts by user name and post ID","mimeType":"application/json"}]}}
+  Client: {"jsonrpc": "2.0", "method": "resources/read", "params": {"uri": "users://test"}, "id": 7 }
+  Server: {"jsonrpc":"2.0","id":7,"result":{"contents":[{"uri":"users://test","mimeType":"application/json","text":"Hello test!"}]}}
+  Client: {"jsonrpc": "2.0", "method": "resources/read", "params": {"uri": "users://test/posts/3"}, "id": 9}
+  Server: {"jsonrpc":"2.0","id":9,"result":{"contents":[{"uri":"users://test/posts/3","mimeType":"application/json","text":"Hello test! I see your post 3"}]}}

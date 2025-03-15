@@ -96,12 +96,6 @@ Test with MCP Inspector
 bunx @modelcontextprotocol/inspector $(pwd)/examples/hello_world.rb
 ```
 
-Find broken using `hello_world.rb`
-
-```bash
-./test/test_requests.sh
-```
-
 ## Formatting
 
 ```bash

@@ -22,7 +22,3 @@ jobs:
           cache-version: 1
       - name: Run tests
         run: bundle exec ruby -Ilib:test -e "Dir.glob('./test/**/*_test.rb').each { |f| require f }"
-      - name: Run smoke test
-        run: |
-          chmod +x test/test_requests.sh
-          test/test_requests.sh
