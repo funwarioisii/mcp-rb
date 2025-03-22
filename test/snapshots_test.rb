@@ -8,7 +8,7 @@ class SnapshotsTest < MCPTest::TestCase
     with_started_server("examples/hello_world.rb") do |server_io|
       client_messages = [
         # Initialize request
-        '{"jsonrpc": "2.0", "method": "initialize", "params": {"protocolVersion": "2024-11-05"}, "id": 1}',
+        '{"jsonrpc": "2.0", "method": "initialize", "params": {"protocolVersion": "2024-11-05", "capabilities": {}, "clientInfo": {"name": "test_client", "version": "1.0.0"}}, "id": 1}',
         # Initialized notification
         '{"jsonrpc": "2.0", "method": "notifications/initialized"}',
         # List tools request

@@ -87,14 +87,21 @@ module MCP
         method: Constants::RequestMethods::INITIALIZE,
         params: {
           protocolVersion: "1999-01-01",
-          capabilities: {}
+          capabilities: {},
+          clientInfo: {
+            name: "test_client",
+            version: "1.0.0"
+          }
         }
       )
       response = send_message request
 
-      assert response[:error]
-      assert_equal Constants::ErrorCodes::INVALID_PARAMS, response[:error][:code]
-      assert_equal "Unsupported protocol version", response[:error][:message]
+      expected_error = {
+        code: Constants::ErrorCodes::INVALID_PARAMS,
+        message: "Unsupported protocol version",
+        data: {supported: ["2024-11-05"], requested: "1999-01-01"}
+      }
+      assert_equal expected_error, response[:error]
     end
 
     def test_does_not_allow_non_ping_requests_before_initialize
@@ -105,9 +112,11 @@ module MCP
       )
       response = send_message request
 
-      assert response[:error]
-      assert_equal Constants::ErrorCodes::NOT_INITIALIZED, response[:error][:code]
-      assert_equal "Server not initialized", response[:error][:message]
+      expected_error = {
+        code: Constants::ErrorCodes::NOT_INITIALIZED,
+        message: "Server not initialized"
+      }
+      assert_equal expected_error, response[:error]
     end
 
     def test_allows_ping_requests_before_initialize
@@ -131,9 +140,63 @@ module MCP
 
       response = send_message "not json"
 
-      assert response[:error]
-      assert_equal Constants::ErrorCodes::PARSE_ERROR, response[:error][:code]
-      assert_includes response[:error][:message], "Invalid JSON"
+      expected_error = {
+        code: Constants::ErrorCodes::PARSE_ERROR,
+        message: "Invalid JSON: unexpected token at 'not json'"
+      }
+      assert_equal expected_error, response[:error]
+    end
+
+    def test_does_not_allow_non_json_rpc_messages
+      start_server
+      non_json_rpc_message = {"some_key" => "some_value"}.to_json
+
+      response = send_message non_json_rpc_message
+
+      expected_error = {
+        code: Constants::ErrorCodes::INVALID_REQUEST,
+        message: "Invalid request",
+        data: {
+          errors: ["object at root is missing required properties: jsonrpc, method"]
+        }
+      }
+      assert_equal expected_error, response[:error]
+    end
+
+    def test_does_not_allow_messages_with_unknown_method
+      start_initialized_server
+
+      request = json_rpc_message(
+        method: "unknown_method"
+      )
+      response = send_message request
+
+      expected_error = {
+        code: Constants::ErrorCodes::METHOD_NOT_FOUND,
+        message: "Unknown method: unknown_method"
+      }
+      assert_equal expected_error, response[:error]
+    end
+
+    def test_does_not_allow_messages_with_invalid_params
+      start_initialized_server
+
+      request = json_rpc_message(
+        method: Constants::RequestMethods::RESOURCES_READ,
+        params: {
+          invalid_param: "invalid_value"
+        }
+      )
+      response = send_message request
+
+      expected_error = {
+        code: Constants::ErrorCodes::INVALID_PARAMS,
+        message: "Invalid params",
+        data: {
+          errors: ["object at `/params` is missing required properties: uri"]
+        }
+      }
+      assert_equal expected_error, response[:error]
     end
 
     def test_reports_internal_errors
@@ -219,7 +282,11 @@ module MCP
         method: Constants::RequestMethods::INITIALIZE,
         params: {
           protocolVersion: Constants::PROTOCOL_VERSION,
-          capabilities: {}
+          capabilities: {},
+          clientInfo: {
+            name: "test_client",
+            version: "1.0.0"
+          }
         }
       )
     end

@@ -1,5 +1,5 @@
 --- |
-  Client: {"jsonrpc": "2.0", "method": "initialize", "params": {"protocolVersion": "2024-11-05"}, "id": 1}
+  Client: {"jsonrpc": "2.0", "method": "initialize", "params": {"protocolVersion": "2024-11-05", "capabilities": {}, "clientInfo": {"name": "test_client", "version": "1.0.0"}}, "id": 1}
   Server: {"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2024-11-05","capabilities":{"resources":{"subscribe":false,"listChanged":false},"tools":{"listChanged":false}},"serverInfo":{"name":"hello-world","version":"1.0.0"}}}
   Client: {"jsonrpc": "2.0", "method": "notifications/initialized"}
   Client: {"jsonrpc": "2.0", "method": "tools/list", "id": 2}

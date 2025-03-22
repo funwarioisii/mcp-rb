@@ -3,6 +3,8 @@
 source "https://rubygems.org"
 
 gem "json"
+# For JSON Schema validation
+gem "json_schemer", "~> 2.4"
 
 group :development, :test do
   gem "minitest"

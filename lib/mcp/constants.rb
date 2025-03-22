@@ -3,7 +3,8 @@
 module MCP
   module Constants
     JSON_RPC_VERSION = "2.0"
-    PROTOCOL_VERSION = "2024-11-05"
+    SUPPORTED_PROTOCOL_VERSIONS = %w[2024-11-05].freeze
+    PROTOCOL_VERSION = SUPPORTED_PROTOCOL_VERSIONS.max
 
     module ErrorCodes
       NOT_INITIALIZED = -32_002
