@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module MCP
-  class Server
+  module Server
     # @abstract
     # Represents a connection to a MCP client via a particular transport.
     # Each transport should implement a class implementing this interface.

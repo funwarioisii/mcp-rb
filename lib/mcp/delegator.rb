@@ -2,19 +2,23 @@
 
 module MCP
   module Delegator
+    BUILDER_METHODS = [:name, :version, :transport].freeze
+
     def self.delegate(*methods)
       methods.each do |method_name|
         define_method(method_name) do |*args, **kwargs, &block|
-          # name が呼ばれたら Server インスタンスを生成
-          # もうすこしいい感じにしたい
-          if method_name == :name && !MCP.server
-            MCP.initialize_server(name: args.first || "default")
+          if BUILDER_METHODS.include?(method_name)
+            MCP.server_builder.send(method_name, args.first)
+            MCP.server_build if MCP.server_buildable?
+            return
           end
-          MCP.server.send(method_name, *args, **kwargs, &block)
+
+          MCP.server&.send(method_name, *args, **kwargs, &block)
         end
       end
     end
 
-    delegate :name, :version, :resource, :resource_template, :tool
+    delegate :name, :version, :resource, :resource_template, :tool,
+      :transport, :port, :host # for HTTP server
   end
 end

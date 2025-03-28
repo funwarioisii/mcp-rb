@@ -1,12 +1,78 @@
+PATH
+  remote: .
+  specs:
+    mcp-rb (0.3.2)
+      falcon
+      json
+      rackup
+
 GEM
   remote: https://rubygems.org/
   specs:
     ansi (1.5.0)
     ast (2.4.2)
+    async (2.23.1)
+      console (~> 1.29)
+      fiber-annotation
+      io-event (~> 1.9)
+      metrics (~> 0.12)
+      traces (~> 0.15)
+    async-container (0.24.0)
+      async (~> 2.22)
+    async-container-supervisor (0.5.1)
+      async-container (~> 0.22)
+      async-service
+      io-endpoint
+      memory-leak (~> 0.5)
+    async-http (0.88.0)
+      async (>= 2.10.2)
+      async-pool (~> 0.9)
+      io-endpoint (~> 0.14)
+      io-stream (~> 0.6)
+      metrics (~> 0.12)
+      protocol-http (~> 0.49)
+      protocol-http1 (~> 0.30)
+      protocol-http2 (~> 0.22)
+      traces (~> 0.10)
+    async-http-cache (0.4.5)
+      async-http (~> 0.56)
+    async-pool (0.10.3)
+      async (>= 1.25)
+    async-service (0.13.0)
+      async
+      async-container (~> 0.16)
     builder (3.3.0)
+    console (1.30.2)
+      fiber-annotation
+      fiber-local (~> 1.1)
+      json
+    falcon (0.51.1)
+      async
+      async-container (~> 0.20)
+      async-container-supervisor (~> 0.5.0)
+      async-http (~> 0.75)
+      async-http-cache (~> 0.4)
+      async-service (~> 0.10)
+      bundler
+      localhost (~> 1.1)
+      openssl (~> 3.0)
+      protocol-http (~> 0.31)
+      protocol-rack (~> 0.7)
+      samovar (~> 2.3)
+    fiber-annotation (0.2.0)
+    fiber-local (1.1.0)
+      fiber-storage
+    fiber-storage (1.0.0)
+    io-endpoint (0.15.2)
+    io-event (1.10.0)
+    io-stream (0.6.1)
     json (2.10.1)
     language_server-protocol (3.17.0.4)
     lint_roller (1.1.0)
+    localhost (1.3.1)
+    mapping (1.1.1)
+    memory-leak (0.5.2)
+    metrics (0.12.2)
     minitest (5.25.4)
     minitest-reporters (1.7.1)
       ansi
@@ -14,11 +80,25 @@ GEM
       minitest (>= 5.0)
       ruby-progressbar
     minitest-snapshots (1.1.3)
+    openssl (3.3.0)
     parallel (1.26.3)
     parser (3.3.7.1)
       ast (~> 2.4.1)
       racc
+    protocol-hpack (1.5.1)
+    protocol-http (0.49.0)
+    protocol-http1 (0.34.0)
+      protocol-http (~> 0.22)
+    protocol-http2 (0.22.1)
+      protocol-hpack (~> 1.4)
+      protocol-http (~> 0.47)
+    protocol-rack (0.11.2)
+      protocol-http (~> 0.43)
+      rack (>= 1.0)
     racc (1.8.1)
+    rack (3.1.12)
+    rackup (2.2.1)
+      rack (>= 3)
     rainbow (3.1.1)
     rake (13.2.1)
     regexp_parser (2.10.0)
@@ -38,6 +118,9 @@ GEM
       rubocop (>= 1.48.1, < 2.0)
       rubocop-ast (>= 1.31.1, < 2.0)
     ruby-progressbar (1.13.0)
+    samovar (2.3.0)
+      console (~> 1.0)
+      mapping (~> 1.0)
     standard (1.44.0)
       language_server-protocol (~> 3.17.0.2)
       lint_roller (~> 1.0)
@@ -52,6 +135,7 @@ GEM
       rubocop-performance (~> 1.23.0)
     standardrb (1.0.1)
       standard
+    traces (0.15.2)
     unicode-display_width (3.1.4)
       unicode-emoji (~> 4.0, >= 4.0.4)
     unicode-emoji (4.0.4)
@@ -61,7 +145,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  json
+  mcp-rb!
   minitest
   minitest-reporters
   minitest-snapshots

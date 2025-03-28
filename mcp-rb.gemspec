@@ -16,6 +16,10 @@ Gem::Specification.new do |spec|
   spec.metadata["source_code_uri"] = spec.homepage
   spec.metadata["changelog_uri"] = "#{spec.homepage}/blob/main/CHANGELOG.md"
 
+  spec.add_dependency "json"
+  spec.add_dependency "falcon"
+  spec.add_dependency "rackup"
+
   # Specify which files should be added to the gem when it is released.
   spec.files = Dir.glob(%w[
     lib/**/*

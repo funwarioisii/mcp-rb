@@ -2,7 +2,11 @@
 
 source "https://rubygems.org"
 
-gem "json"
+gemspec
+
+group :development do
+  gem "standardrb", "~> 1.0"
+end
 
 group :development, :test do
   gem "rake"
@@ -11,5 +15,3 @@ group :development, :test do
   # For snapshot testing of client/server interactions
   gem "minitest-snapshots"
 end
-
-gem "standardrb", "~> 1.0", group: :development
