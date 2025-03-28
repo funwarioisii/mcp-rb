@@ -24,4 +24,6 @@ Gem::Specification.new do |spec|
     CHANGELOG.md
   ])
   spec.require_paths = ["lib"]
+
+  spec.add_dependency "addressable", "~> 2.8.0"
 end

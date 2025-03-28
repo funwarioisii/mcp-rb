@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "addressable/template"
 require_relative "resource"
 
 module MCP
@@ -19,7 +20,6 @@ module MCP
           @description = ""
           @mime_type = "text/plain"
           @handler = nil
-          @variables = extract_variables(uri_template)
         end
 
         # standard:disable Lint/DuplicateMethods,Style/TrivialAccessors
@@ -53,40 +53,7 @@ module MCP
             mime_type: @mime_type,
             description: @description,
             handler: @handler,
-            variables: @variables
           }
-        end
-
-        # Extract variables from a URI template
-        # e.g., "channels://{channel_id}" => ["channel_id"]
-        def extract_variables(uri_template)
-          variables = []
-          uri_template.scan(/\{([^}]+)\}/) do |match|
-            variables << match[0]&.to_sym
-          end
-          variables
-        end
-
-        # Creates a pattern for matching URIs against this template
-        def to_pattern
-          pattern_string = Regexp.escape(@uri_template).gsub(/\\\{[^}]+\\\}/) do |match|
-            "([^/]+)"
-          end
-          Regexp.new("^#{pattern_string}$")
-        end
-
-        # Extract variable values from a concrete URI based on the template
-        # e.g., template: "channels://{channel_id}", uri: "channels://123" => {"channel_id" => "123"}
-        def extract_variable_values(uri)
-          pattern = to_pattern
-          match = pattern.match(uri)
-          return {} unless match
-
-          result = {}
-          @variables.each_with_index do |var_name, index|
-            result[var_name] = match[index + 1]
-          end
-          result
         end
       end
 
@@ -94,16 +61,18 @@ module MCP
         builder = ResourceTemplateBuilder.new(uri_template)
         builder.instance_eval(&block)
         template_hash = builder.to_resource_template_hash
-        resource_templates[uri_template] = template_hash
+        template = Addressable::Template.new(uri_template)
+        resource_templates[template] = template_hash
         template_hash
       end
 
       # Find a template that matches the given URI and extract variable values
       def find_matching_template(uri)
-        resource_templates.each do |template_uri, template|
-          builder = ResourceTemplateBuilder.new(template_uri)
-          variable_values = builder.extract_variable_values(uri)
-          return [template, variable_values] unless variable_values.empty?
+        resource_templates.each do |template, resource_template|
+          variable_values = template.extract(uri)
+          next if variable_values.nil? || variable_values.empty?
+
+          return [resource_template, variable_values.transform_keys(&:to_sym)]
         end
         [nil, {}]
       end
