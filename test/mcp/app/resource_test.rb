@@ -5,12 +5,20 @@ require_relative "../../test_helper"
 module MCP
   class App
     class ResourceTest < MCPTest::TestCase
+      class TestApp
+        include MCP::App::Resource
+      end
+
       def setup
-        @app = App.new
+        @app = TestApp.new
+      end
+
+      def teardown
+        TestApp.reset!
       end
 
       def test_register_and_list_resources
-        @app.register_resource("/test") do
+        TestApp.resource("/test") do
           name "test_resource"
           description "A test resource"
           call { "test content" }
@@ -28,7 +36,7 @@ module MCP
 
       def test_resources_pagination
         10.times do |i|
-          @app.register_resource("/test#{i}") do
+          TestApp.resource("/test#{i}") do
             name "resource#{i}"
             call { "content#{i}" }
           end
@@ -57,7 +65,7 @@ module MCP
       end
 
       def test_read_resource
-        @app.register_resource("/test") do
+        TestApp.resource("/test") do
           name "test_resource"
           call { "test content" }
         end
@@ -72,21 +80,21 @@ module MCP
       end
 
       def test_invalid_resource_registration
-        error = assert_raises(ArgumentError) { @app.register_resource(nil) }
+        error = assert_raises(ArgumentError) { TestApp.resource(nil) {} }
         assert_match(/Resource URI cannot be nil or empty/, error.message)
 
-        error = assert_raises(ArgumentError) { @app.register_resource("") }
+        error = assert_raises(ArgumentError) { TestApp.resource("") {} }
         assert_match(/Resource URI cannot be nil or empty/, error.message)
 
         error = assert_raises(ArgumentError) do
-          @app.register_resource("/test") do
+          TestApp.resource("/test") do
             # nameとhandlerが設定されていない
           end
         end
         assert_match(/Handler must be provided/, error.message)
 
         error = assert_raises(ArgumentError) do
-          @app.register_resource("/test") do
+          TestApp.resource("/test") do
             call { "test" }
             # nameが設定されていない
           end

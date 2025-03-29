@@ -4,15 +4,40 @@ require_relative "resource"
 
 module MCP
   class App
+    # Include this module in your app to add resource template functionality
     module ResourceTemplate
-      def resource_templates
-        @resource_templates ||= {}
+      def self.included(base)
+        base.include(MCP::App::Resource)
+        base.extend(ClassMethods)
+      end
+
+      module ClassMethods
+        def resource_templates
+          @resource_templates ||= {}
+        end
+
+        def resource_template(resource_template, &block)
+          resource_template = ResourceTemplateBuilder.new(resource_template, &block) if block_given?
+
+          resource_template_hash = resource_template.to_h
+          uri_template = resource_template_hash[:uri_template]
+
+          raise ArgumentError, "Resource URI template cannot be nil or empty" if uri_template.nil? || uri_template.empty?
+          raise ArgumentError, "Handler must be provided" if resource_template_hash[:handler].nil?
+          raise ArgumentError, "Name must be provided" if resource_template_hash[:name].empty?
+
+          resource_templates[uri_template] = resource_template_hash
+        end
+
+        def reset!
+          @resource_templates = nil
+        end
       end
 
       class ResourceTemplateBuilder
-        attr_reader :uri_template, :name, :description, :mime_type, :handler
+        attr_reader :uri_template, :handler
 
-        def initialize(uri_template)
+        def initialize(uri_template, &block)
           raise ArgumentError, "Resource URI template cannot be nil or empty" if uri_template.nil? || uri_template.empty?
           @uri_template = uri_template
           @name = ""
@@ -20,33 +45,28 @@ module MCP
           @mime_type = "text/plain"
           @handler = nil
           @variables = extract_variables(uri_template)
+          instance_eval(&block) if block_given?
         end
 
-        # standard:disable Lint/DuplicateMethods,Style/TrivialAccessors
+        # standard:disable Style/TrivialAccessors
         def name(value)
           @name = value
         end
-        # standard:enable Lint/DuplicateMethods,Style/TrivialAccessors
 
-        # standard:disable Lint/DuplicateMethods,Style/TrivialAccessors
         def description(text)
           @description = text
         end
-        # standard:enable Lint/DuplicateMethods,Style/TrivialAccessors
 
-        # standard:disable Lint/DuplicateMethods,Style/TrivialAccessors
         def mime_type(value)
           @mime_type = value
         end
-        # standard:enable Lint/DuplicateMethods,Style/TrivialAccessors
+        # standard:enable Style/TrivialAccessors
 
         def call(&block)
           @handler = block
         end
 
-        def to_resource_template_hash
-          raise ArgumentError, "Name must be provided" if @name.empty?
-
+        def to_h
           {
             uri_template: @uri_template,
             name: @name,
@@ -90,12 +110,8 @@ module MCP
         end
       end
 
-      def register_resource_template(uri_template, &block)
-        builder = ResourceTemplateBuilder.new(uri_template)
-        builder.instance_eval(&block)
-        template_hash = builder.to_resource_template_hash
-        resource_templates[uri_template] = template_hash
-        template_hash
+      def resource_templates
+        self.class.resource_templates
       end
 
       # Find a template that matches the given URI and extract variable values

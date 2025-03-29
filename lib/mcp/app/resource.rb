@@ -2,49 +2,72 @@
 
 module MCP
   class App
+    # Include this module in your app to add resource functionality
     module Resource
-      def resources
-        @resources ||= {}
+
+      def self.included(base)
+        base.extend(ClassMethods)
+      end
+
+      module ClassMethods
+        def resources
+          @resources ||= {}
+        end
+
+        def resource(resource, &block)
+          resource = ResourceBuilder.new(resource, &block) if block_given?
+
+          resource_hash = resource.to_h
+          uri = resource_hash[:uri]
+
+          raise ArgumentError, "Resource URI cannot be nil or empty" if uri.nil? || uri.empty?
+          raise ArgumentError, "Handler must be provided" unless resource_hash[:handler]
+          raise ArgumentError, "Name must be provided" if resource_hash[:name].empty?
+
+          resources[uri] = resource_hash
+        end
+
+        def reset!
+          @resources = nil
+        end
       end
 
       class ResourceBuilder
-        attr_reader :uri, :name, :description, :mime_type, :handler
+        attr_reader :uri, :handler
 
-        def initialize(uri)
-          raise ArgumentError, "Resource URI cannot be nil or empty" if uri.nil? || uri.empty?
+        def self.build(resource, &block)
+          resource = new(resource, &block) if block_given?
+          resource.to_h
+        end
+
+        def initialize(uri, &block)
           @uri = uri
           @name = ""
           @description = ""
           @mime_type = "text/plain"
           @handler = nil
+          instance_eval(&block) if block_given?
         end
 
-        # standard:disable Lint/DuplicateMethods,Style/TrivialAccessors
+        # standard:disable Style/TrivialAccessors
         def name(value)
           @name = value
         end
-        # standard:enable Lint/DuplicateMethods,Style/TrivialAccessors
 
-        # standard:disable Lint/DuplicateMethods,Style/TrivialAccessors
         def description(text)
           @description = text
         end
-        # standard:enable Lint/DuplicateMethods,Style/TrivialAccessors
 
-        # standard:disable Lint/DuplicateMethods,Style/TrivialAccessors
         def mime_type(value)
           @mime_type = value
         end
-        # standard:enable Lint/DuplicateMethods,Style/TrivialAccessors
+        # standard:enable Style/TrivialAccessors
 
         def call(&block)
           @handler = block
         end
 
-        def to_resource_hash
-          raise ArgumentError, "Handler must be provided" unless @handler
-          raise ArgumentError, "Name must be provided" if @name.empty?
-
+        def to_h
           {
             uri: @uri,
             name: @name,
@@ -55,12 +78,8 @@ module MCP
         end
       end
 
-      def register_resource(uri, &block)
-        builder = ResourceBuilder.new(uri)
-        builder.instance_eval(&block)
-        resource_hash = builder.to_resource_hash
-        resources[uri] = resource_hash
-        resource_hash
+      def resources
+        self.class.resources
       end
 
       def list_resources(cursor: nil, page_size: nil)

@@ -5,12 +5,21 @@ require_relative "../../test_helper"
 module MCP
   class App
     class ResourceTemplateTest < MCPTest::TestCase
+      class TestApp
+        include MCP::App::Resource
+        include MCP::App::ResourceTemplate
+      end
+
       def setup
-        @app = App.new
+        @app = TestApp.new
+      end
+
+      def teardown
+        TestApp.reset!
       end
 
       def test_extract_variables
-        @app.register_resource_template("/test/{param1}/{param2}") do
+        TestApp.resource_template("/test/{param1}/{param2}") do
           name "test_template"
           call { |args| "#{args[:param1]}, #{args[:param2]}" }
         end
@@ -21,7 +30,7 @@ module MCP
       end
 
       def test_register_and_list_resource_templates
-        @app.register_resource_template("/test/{param_1}") do
+        TestApp.resource_template("/test/{param_1}") do
           name "test_resource template"
           description "A test resource template"
           call { |args| "test content #{args[:param_1]}" }
@@ -39,7 +48,7 @@ module MCP
 
       def test_resource_templates_pagination
         10.times do |i|
-          @app.register_resource_template("/test#{i}/{param_1}") do
+          TestApp.resource_template("/test#{i}/{param_1}") do
             name "resource#{i}"
             call { |args| "content#{i} #{args[:param_1]}" }
           end
@@ -70,7 +79,7 @@ module MCP
       end
 
       def test_read_resource_template
-        @app.register_resource_template("/test/{param_1}") do
+        TestApp.resource_template("/test/{param_1}") do
           name "test_resource"
           call { |args| "test content #{args[:param_1]}" }
         end
@@ -84,23 +93,24 @@ module MCP
         assert_match(/Resource not found/, error.message)
       end
 
-      def test_invalid_resource_registration
-        error = assert_raises(ArgumentError) { @app.register_resource(nil) }
-        assert_match(/Resource URI cannot be nil or empty/, error.message)
+      def test_invalid_resource_template_registration
+        error = assert_raises(ArgumentError) { TestApp.resource_template(nil) {} }
+        assert_match(/Resource URI template cannot be nil or empty/, error.message)
 
-        error = assert_raises(ArgumentError) { @app.register_resource("") }
-        assert_match(/Resource URI cannot be nil or empty/, error.message)
+        error = assert_raises(ArgumentError) { TestApp.resource_template("") {} }
+        assert_match(/Resource URI template cannot be nil or empty/, error.message)
 
         error = assert_raises(ArgumentError) do
-          @app.register_resource("/test") do
+          TestApp.resource_template("/test") do
+            name "test_resource"
             # nameとhandlerが設定されていない
           end
         end
         assert_match(/Handler must be provided/, error.message)
 
         error = assert_raises(ArgumentError) do
-          @app.register_resource("/test") do
-            call { "test" }
+          TestApp.resource_template("/test") do
+            call { |args| "test content #{args[:param_1]}" }
             # nameが設定されていない
           end
         end

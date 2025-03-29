@@ -2,9 +2,32 @@
 
 module MCP
   class App
+    # Include this module in your app to add tool functionality
     module Tool
-      def tools
-        @tools ||= {}
+      def self.included(base)
+        base.extend(ClassMethods)
+      end
+
+      module ClassMethods
+        def tools
+          @tools ||= {}
+        end
+
+        def tool(tool, &block)
+          tool = ToolBuilder.new(tool, &block) if block_given?
+
+          tool_hash = tool.to_h
+          name = tool_hash[:name]
+
+          raise ArgumentError, "Tool name cannot be nil or empty" if name.nil? || name.empty?
+          raise ArgumentError, "Handler must be provided" if tool_hash[:handler].nil?
+
+          tools[name] = tool_hash
+        end
+
+        def reset!
+          @tools = nil
+        end
       end
 
       # Builds schemas for arguments, supporting simple types, nested objects, and arrays
@@ -66,16 +89,15 @@ module MCP
         end
       end
 
-      # Constructs tool definitions with enhanced schema support
       class ToolBuilder
         attr_reader :name, :arguments, :handler
 
-        def initialize(name)
-          raise ArgumentError, "Tool name cannot be nil or empty" if name.nil? || name.empty?
+        def initialize(name, &block)
           @name = name
           @description = ""
           @schema_builder = SchemaBuilder.new
           @handler = nil
+          instance_eval(&block) if block_given?
         end
 
         def description(text = nil)
@@ -90,8 +112,7 @@ module MCP
           @handler = block if block_given?
         end
 
-        def to_tool_hash
-          raise ArgumentError, "Handler must be provided" unless @handler
+        def to_h
           {
             name: @name,
             description: @description,
@@ -101,11 +122,8 @@ module MCP
         end
       end
 
-      # Registers a tool with the given name and block
-      def register_tool(name, &block)
-        builder = ToolBuilder.new(name)
-        builder.instance_eval(&block)
-        tools[name] = builder.to_tool_hash
+      def tools
+        self.class.tools
       end
 
       # Lists tools with pagination

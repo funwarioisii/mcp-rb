@@ -8,10 +8,12 @@ require_relative "../lib/mcp"
 
 module MCPTest
   class TestCase < Minitest::Test
-    protected
+    def setup
+      MCP::App.reset!
+    end
 
-    def build_test_server
-      MCP::Server.new(name: "test_server")
+    def teardown
+      MCP::App.reset!
     end
 
     def initialize_server(server)
