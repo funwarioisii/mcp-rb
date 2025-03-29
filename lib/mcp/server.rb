@@ -4,6 +4,7 @@ require "json"
 require "English"
 require "uri"
 require_relative "constants"
+require_relative "message_validator"
 require_relative "server/client_connection"
 require_relative "server/stdio_client_connection"
 
@@ -16,7 +17,7 @@ module MCP
       @version = version
       @app = App.new
       @initialized = false
-      @supported_protocol_versions = [Constants::PROTOCOL_VERSION]
+      @message_validator = MessageValidator.new protocol_version: Constants::PROTOCOL_VERSION
     end
 
     def name(value = nil)
@@ -29,7 +30,6 @@ module MCP
       return @version if value.nil?
 
       @version = value
-      @supported_protocol_versions << value
     end
 
     def tool(name, &block)
@@ -88,16 +88,48 @@ module MCP
 
     def process_input(line)
       result = begin
-        request = JSON.parse(line, symbolize_names: true)
-        handle_request(request)
+        request = JSON.parse(line)
+        @message_validator.validate_client_message!(request)
+        handle_request deep_symbolize_keys(request)
       rescue JSON::ParserError => e
         error_response(nil, Constants::ErrorCodes::PARSE_ERROR, "Invalid JSON: #{e.message}")
+      rescue MessageValidator::UnknownMethod
+        error_response(
+          request["id"],
+          Constants::ErrorCodes::METHOD_NOT_FOUND,
+          "Unknown method: #{request["method"]}"
+        )
+      rescue MessageValidator::InvalidParams => e
+        error_response(
+          request["id"],
+          Constants::ErrorCodes::INVALID_PARAMS,
+          "Invalid params",
+          {errors: e.errors}
+        )
+      rescue MessageValidator::InvalidMessage => e
+        error_response(
+          nil,
+          Constants::ErrorCodes::INVALID_REQUEST,
+          "Invalid request",
+          {errors: e.errors}
+        )
       rescue => e
         error_response(nil, Constants::ErrorCodes::INTERNAL_ERROR, e.message)
       end
 
       result = JSON.generate(result) if result
       result
+    end
+
+    def deep_symbolize_keys(obj)
+      case obj
+      when Hash
+        obj.to_h { |key, value| [key.to_sym, deep_symbolize_keys(value)] }
+      when Array
+        obj.map { |value| deep_symbolize_keys(value) }
+      else
+        obj
+      end
     end
 
     def handle_request(request)
@@ -119,8 +151,6 @@ module MCP
       when Constants::RequestMethods::RESOURCES_LIST then handle_list_resources(request)
       when Constants::RequestMethods::RESOURCES_READ then handle_read_resource(request)
       when Constants::RequestMethods::RESOURCES_TEMPLATES_LIST then handle_list_resources_templates(request)
-      else
-        error_response(request[:id], Constants::ErrorCodes::METHOD_NOT_FOUND, "Unknown method: #{request[:method]}")
       end
     end
 
@@ -128,13 +158,13 @@ module MCP
       return error_response(request[:id], Constants::ErrorCodes::ALREADY_INITIALIZED, "Server already initialized") if @initialized
 
       client_version = request.dig(:params, :protocolVersion)
-      unless @supported_protocol_versions.include?(client_version)
+      unless Constants::SUPPORTED_PROTOCOL_VERSIONS.include?(client_version)
         return error_response(
           request[:id],
           Constants::ErrorCodes::INVALID_PARAMS,
           "Unsupported protocol version",
           {
-            supported: @supported_protocol_versions,
+            supported: Constants::SUPPORTED_PROTOCOL_VERSIONS,
             requested: client_version
           }
         )

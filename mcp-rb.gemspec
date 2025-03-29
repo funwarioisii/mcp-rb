@@ -16,9 +16,13 @@ Gem::Specification.new do |spec|
   spec.metadata["source_code_uri"] = spec.homepage
   spec.metadata["changelog_uri"] = "#{spec.homepage}/blob/main/CHANGELOG.md"
 
+  # For JSON Schema validation
+  spec.add_dependency "json_schemer"
+
   # Specify which files should be added to the gem when it is released.
   spec.files = Dir.glob(%w[
     lib/**/*
+    schemas/**/*
     README.md
     LICENSE.txt
     CHANGELOG.md
