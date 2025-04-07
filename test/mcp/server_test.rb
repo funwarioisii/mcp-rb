@@ -4,6 +4,19 @@ require_relative "../test_helper"
 
 module MCP
   class ServerTest < MCPTest::TestCase
+    def teardown
+      App.reset!
+    end
+
+    def test_server_version
+      prepare_server(version: "1.2.3")
+
+      assert_equal "1.2.3", @server.version
+
+      initialize_response = initialize_server(@server)
+      assert_equal "1.2.3", initialize_response[:result][:serverInfo][:version]
+    end
+
     def test_basic_server_info
       prepare_server(name: "special_test_server", version: "1.4.1")
 
@@ -258,11 +271,9 @@ module MCP
     end
 
     def prepare_server(name: "test_server", version: nil)
-      kwargs = {
-        name: name,
-        version: version
-      }.compact
-      @server = Server.new(**kwargs)
+      App.name(name) if name
+      App.version(version) if version
+      @server = Server.new(App.new)
     end
 
     def send_message(message)

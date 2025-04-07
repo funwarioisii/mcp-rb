@@ -5,13 +5,21 @@ require_relative "../../test_helper"
 module MCP
   class App
     class ToolTest < MCPTest::TestCase
+      class TestApp
+        include MCP::App::Tool
+      end
+
       def setup
-        @app = App.new
+        @app = TestApp.new
+      end
+
+      def teardown
+        TestApp.reset!
       end
 
       def test_tools_pagination
         10.times do |i|
-          @app.register_tool("tool#{i}") do
+          TestApp.tool("tool#{i}") do
             description "Tool #{i}"
             argument :value, String, required: true, description: "Value for tool #{i}"
 
@@ -37,7 +45,7 @@ module MCP
       end
 
       def test_register_tool
-        tool = @app.register_tool("greet") do
+        tool = TestApp.tool("greet") do
           description "Greet someone by name"
           argument :name, String, required: true, description: "Name to greet"
 
@@ -70,7 +78,7 @@ module MCP
       end
 
       def test_register_tool_with_multiple_arguments
-        tool = @app.register_tool("format_greeting") do
+        tool = TestApp.tool("format_greeting") do
           description "Format a greeting with title and name"
           argument :title, String, required: true, description: "Title (Mr./Ms./Dr. etc.)"
           argument :first_name, String, required: true, description: "First name"
@@ -144,7 +152,7 @@ module MCP
 
       def test_tool_without_handler
         error = assert_raises(ArgumentError) do
-          @app.register_tool("invalid") do
+          TestApp.tool("invalid") do
             description "Invalid tool without handler"
           end
         end
@@ -153,7 +161,7 @@ module MCP
 
       def test_tool_with_invalid_name
         error = assert_raises(ArgumentError) do
-          @app.register_tool(nil) do
+          TestApp.tool(nil) do
             description "Invalid tool"
             call do |args|
               "test"
@@ -164,7 +172,7 @@ module MCP
       end
 
       def test_tool_with_nested_object
-        tool = @app.register_tool("create_user") do
+        tool = TestApp.tool("create_user") do
           description "Create a user with details"
           argument :user, required: true do
             argument :username, String, required: true, description: "Username"
@@ -229,7 +237,7 @@ module MCP
 
       # Test for a tool with an array of simple types
       def test_tool_with_array_argument
-        @app.register_tool("sum_numbers") do
+        tool = TestApp.tool("sum_numbers") do
           description "Sum an array of numbers"
           argument :numbers, Array, items: Integer, description: "Array of numbers to sum"
 
@@ -279,7 +287,7 @@ module MCP
 
       # Test for a tool with an array of objects
       def test_tool_with_array_of_objects
-        @app.register_tool("list_users") do
+        tool = TestApp.tool("list_users") do
           description "List users with their details"
           argument :users, Array do
             argument :name, String, required: true, description: "User's name"

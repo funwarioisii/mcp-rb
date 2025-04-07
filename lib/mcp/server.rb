@@ -9,39 +9,22 @@ require_relative "server/client_connection"
 require_relative "server/stdio_client_connection"
 
 module MCP
+  # A Server handles MCP requests from an MCP client using the App.
   class Server
-    attr_writer :name, :version
+    attr_reader :app
 
-    def initialize(name:, version: "0.1.0")
-      @name = name
-      @version = version
-      @app = App.new
+    def initialize(app)
+      @app = app
       @initialized = false
       @message_validator = MessageValidator.new protocol_version: Constants::PROTOCOL_VERSION
     end
 
-    def name(value = nil)
-      return @name if value.nil?
-
-      @name = value
+    def name
+      @app.name
     end
 
-    def version(value = nil)
-      return @version if value.nil?
-
-      @version = value
-    end
-
-    def tool(name, &block)
-      @app.register_tool(name, &block)
-    end
-
-    def resource(uri, &block)
-      @app.register_resource(uri, &block)
-    end
-
-    def resource_template(uri_template, &block)
-      @app.register_resource_template(uri_template, &block)
+    def version
+      @app.version
     end
 
     def initialized?
@@ -185,8 +168,8 @@ module MCP
             }
           },
           serverInfo: {
-            name: @name,
-            version: @version
+            name: @app.name,
+            version: @app.version
           }
         }
       }
