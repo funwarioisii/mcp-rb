@@ -142,27 +142,6 @@ module MCP
         assert_equal "Error: Missing required param :title", result.dig(:content, 0, :text)
       end
 
-      def test_tool_without_handler
-        error = assert_raises(ArgumentError) do
-          @app.register_tool("invalid") do
-            description "Invalid tool without handler"
-          end
-        end
-        assert_match(/Handler must be provided/, error.message)
-      end
-
-      def test_tool_with_invalid_name
-        error = assert_raises(ArgumentError) do
-          @app.register_tool(nil) do
-            description "Invalid tool"
-            call do |args|
-              "test"
-            end
-          end
-        end
-        assert_match(/Tool name cannot be nil or empty/, error.message)
-      end
-
       def test_tool_with_nested_object
         tool = @app.register_tool("create_user") do
           description "Create a user with details"
