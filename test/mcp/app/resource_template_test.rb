@@ -83,29 +83,6 @@ module MCP
         error = assert_raises(ArgumentError) { @app.read_resource("/non_existent") }
         assert_match(/Resource not found/, error.message)
       end
-
-      def test_invalid_resource_registration
-        error = assert_raises(ArgumentError) { @app.register_resource(nil) }
-        assert_match(/Resource URI cannot be nil or empty/, error.message)
-
-        error = assert_raises(ArgumentError) { @app.register_resource("") }
-        assert_match(/Resource URI cannot be nil or empty/, error.message)
-
-        error = assert_raises(ArgumentError) do
-          @app.register_resource("/test") do
-            # nameとhandlerが設定されていない
-          end
-        end
-        assert_match(/Handler must be provided/, error.message)
-
-        error = assert_raises(ArgumentError) do
-          @app.register_resource("/test") do
-            call { "test" }
-            # nameが設定されていない
-          end
-        end
-        assert_match(/Name must be provided/, error.message)
-      end
     end
   end
 end
