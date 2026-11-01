@@ -1,5 +1,18 @@
 # MCP-RB
 
+> [!WARNING]
+> **This project is no longer maintained, and this repository will be archived.**
+>
+> Please use the official [MCP Ruby SDK](https://github.com/modelcontextprotocol/ruby-sdk) ([`mcp`](https://rubygems.org/gems/mcp) gem) instead.
+> It is actively developed under the Model Context Protocol organization and supports the latest protocol features, including clients, prompts, and the Streamable HTTP transport.
+>
+> ```ruby
+> gem "mcp"
+> ```
+>
+> Both `mcp-rb` and `mcp` are loaded with `require "mcp"` and define the top-level `MCP` module, so remove `mcp-rb` from your Gemfile when you switch.
+> See the [official documentation](https://ruby.sdk.modelcontextprotocol.io) to get started.
+
 A lightweight Ruby framework for implementing MCP (Model Context Protocol) servers with a Sinatra-like DSL.
 
 ## Installation
